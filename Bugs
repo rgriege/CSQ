@@ -1,0 +1,10 @@
+Important for stones:
+when adding multiple shapes to a rigid body, center needs to adjust
+friction is off
+pendulum gains energy - (Stormer's) method of verlet integration
+
+General:
+shape penetration radii are slightly off?
+small, high speed objects will pass through other objects
+optimize
+	every frame, set vertices to nextVertices for movement

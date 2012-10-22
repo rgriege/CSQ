@@ -1,0 +1,21 @@
+Version 0.1 (Release Date 7/8/12)
+	- Rigid Bodies constructed of a convex polygon or a circle
+	- Impulse based collisions (with friction)
+	- Vector based gravity
+	- Anchors and fixation
+	- Optional depth
+	- Organized demo system with pause and step funcitonality
+
+Version 0.2 (Release Date 7/22/12)
+	- Rings are now a fully functional collision shape
+	- Rigid Bodies can be constructed from multiple convex polygons, disks, and rings
+	- Improved accuracy when determining the point of collision, especially for rotating bodies
+	- Supports rigid body collisions with planes
+	- Added import and export functionality for demos/levels
+
+Version 0.3 (Release Date TBD)
+	- Fully functional level creator/editor
+
+	- Supports collisions with multiple contact points
+	- Velocity integrator provides more stable energy levels in a closed system
+	- Resting Contact between Rigid Bodies

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" version="3">
+  <includeClasses>
+    <classEntry path="DataStructures.DoublyLinkedList"/>
+    <classEntry path="DataStructures.BinarySearchTree"/>
+    <classEntry path="DataStructures.Stack"/>
+    <classEntry path="MathUtilities.CSQMath"/>
+    <classEntry path="MathUtilities.Interval"/>
+    <classEntry path="DataStructures.BinaryTreeNode"/>
+    <classEntry path="DataStructures.Comparable"/>
+    <classEntry path="DataStructures.Integer"/>
+    <classEntry path="DataStructures.Queue"/>
+    <classEntry path="Collisions.RigidBody"/>
+    <classEntry path="DataStructures.DoublyLinkedListNode"/>
+    <classEntry path="MathUtilities.Vector2D"/>
+    <classEntry path="DataStructures.LinkedListNode"/>
+    <classEntry path="DataStructures.LinkedList"/>
+    <classEntry path="Collisions.Interactions"/>
+    <classEntry path="Collisions.ShapePenetration"/>
+    <classEntry path="MathUtilities.Matrix2D"/>
+    <classEntry path="Collisions.Shapes.Polygon"/>
+    <classEntry path="Collisions.Shapes.AbstractShape"/>
+    <classEntry path="MathUtilities.Functions.AbstractFunction"/>
+    <classEntry path="MathUtilities.Functions.TrigFunction"/>
+    <classEntry path="Collisions.Penetration"/>
+    <classEntry path="Collisions.Shapes.Disk"/>
+    <classEntry path="Collisions.Collision"/>
+    <classEntry path="Collisions.Shapes.Ring"/>
+    <classEntry path="Editor.Level"/>
+    <classEntry path="Editor.SaveFile"/>
+    <classEntry path="Collisions.ContactSolver"/>
+    <classEntry path="Editor.Icon"/>
+    <classEntry path="Editor.Toolbar"/>
+    <classEntry path="Editor.ToolSelectedEvent"/>
+    <classEntry path="Editor.Interface"/>
+    <classEntry path="Editor.ControlBar"/>
+    <classEntry path="Editor.AddBodyEvent"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

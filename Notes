@@ -1,0 +1,37 @@
+Physics Engine:
+
+0) Simple Rigid Body - done
+	a. x/y position - done
+	b. x/y velocity - done
+	c. angular velocity - done
+1) Simple Collisions - done
+	a. separate along original velocity vectors - done
+	b. calculate new x/y velocity - done
+	c. calculate new angular velocity - done
+2) Simple Gravity - done
+	a. vector based - done
+3) Constraints - done
+	a. anchors (rotation around pin) - done
+	b. fixation (immovable) - done
+4) Collisions revisited - done
+	d. friction - done
+5) 2.5D - done
+6) Rigid Body revisited
+	d. rings - done
+	e. combination of convex shapes - done
+	
+7) Resting Contact
+
+8) Camera
+	b. object locked to center
+	c. object kept in central rectangle
+	d. frame based
+	e. fit multiple objects
+	f. mouse scrolling on edge of screen
+	g. mouse click and drag
+9) Gravity revisited
+	b. Point based
+10) Constraints revisited
+	c. Springs
+	d. bolts (rotational pins between Rigid Bodies)
+	e. screws (non-rotational pins)
