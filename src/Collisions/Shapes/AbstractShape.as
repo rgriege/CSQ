@@ -63,8 +63,10 @@ package Collisions.Shapes
 			}
 		}
 		
+		public function getSeparatingAxes(s:AbstractShape):Vector.<Vector2D> { return null }
+		
 		// projects the rigid body onto the parameter axis vertex by vertex
-		public function project(axis:Vector2D):Vector.<Interval> { return null }
+		public function project(axis:Vector2D):Interval { return null }
 		
 		public function findMaxRadius():Number { return 0 }
 		

@@ -13,12 +13,12 @@ package Collisions
 		
 		public function ContactSolver(vsp:Vector.<ShapePenetration>)
 		{
-			this.vsp = vsp;
+			/*this.vsp = vsp;
 			findAdjacencyMatrix();
-			resolveContacts(vsp);
+			resolveContacts(vsp);*/
 		}
 		
-		public function findAdjacencyMatrix():void {
+		/*public function findAdjacencyMatrix():void {
 			adjacencyMatrix = CSQMath.getZeroArray(vsp.length);
 			
 		}
@@ -56,6 +56,6 @@ package Collisions
 		
 		private function connected(p1:ShapePenetration, p2:ShapePenetration):Boolean {
 			return p1.rb1 == p2.rb1 || p1.rb1 == p2.rb2 || p1.rb2 == p2.rb1 || p1.rb2 == p2.rb2;
-		}
+		}*/
 	}
 }

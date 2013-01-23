@@ -1,8 +1,8 @@
 package Collisions.Shapes
 {
+	import MathUtilities.CSQMath;
 	import MathUtilities.Interval;
 	import MathUtilities.Vector2D;
-	import MathUtilities.CSQMath;
 
 	public class Disk extends AbstractShape
 	{
@@ -22,12 +22,18 @@ package Collisions.Shapes
 			return 0.5 * mass * Math.pow(radius, 2);
 		}
 		
-		override public function project(axis:Vector2D):Vector.<Interval> {
+		override public function getSeparatingAxes(s:AbstractShape):Vector.<Vector2D> {
+			var result:Vector2D = s.center.copy();
+			result.subtract(nextVertices[0]);
+			var vr:Vector.<Vector2D> = new Vector.<Vector2D>();
+			vr.push(result);
+			return vr;
+		}
+		
+		override public function project(axis:Vector2D):Interval {
 			var axisCopy:Vector2D = axis.isUnitVector() ? axis.copy() : axis.unitVector();
 			var temp:Number = nextVertices[0].dot(axisCopy);
-			var result:Vector.<Interval> = new Vector.<Interval>();
-			result.push(new Interval(temp - radius, temp + radius));
-			return result;
+			return new Interval(temp - radius, temp + radius);
 		}
 		
 		override public function findMaxRadius():Number {
@@ -57,7 +63,7 @@ package Collisions.Shapes
 		}
 		
 		override public function toString():String {
-			return "Circle with centered at " + center.toString();
+			return "Circle centered at " + center.toString();
 		}
 	}
 }

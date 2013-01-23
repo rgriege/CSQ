@@ -27,13 +27,22 @@ package Collisions.Shapes
 			return 0.5 * mass * (Math.pow(outerRadius, 2) - Math.pow(innerRadius, 2));
 		}
 		
-		override public function project(axis:Vector2D):Vector.<Interval> {
+		override public function getSeparatingAxes(s:AbstractShape):Vector.<Vector2D> {
+			var result:Vector2D = s.center.copy();
+			result.subtract(nextVertices[0]);
+			if (result.magnitude() < this.innerRadius)
+				result = result.invert();
+			var vr:Vector.<Vector2D> = new Vector.<Vector2D>();
+			vr.push(result);
+			return vr;
+		}
+		
+		override public function project(axis:Vector2D):Interval {
 			var axisCopy:Vector2D = axis.isUnitVector() ? axis.copy() : axis.unitVector();
 			var temp:Number = nextVertices[0].dot(axisCopy);
 			var result:Vector.<Interval> = new Vector.<Interval>();
-			result.push(new Interval(temp - outerRadius, temp - innerRadius), 
-				new Interval(temp + innerRadius, temp + outerRadius));
-			return result;
+			// new Interval(temp - outerRadius, temp - innerRadius), 
+			return new Interval(temp + innerRadius, temp + outerRadius);
 		}
 		
 		override public function findMaxRadius():Number {

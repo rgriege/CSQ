@@ -70,54 +70,60 @@ package Collisions
 				applyGravity();
 			var stable:Boolean = false;
 			while(!stable) {
-				var contacts:Vector.<ShapePenetration> = detectCollisions();
-				var cs:ContactSolver = new ContactSolver(contacts);
-				if(hasBounds)
-					stable = !checkBounds();
-				else
-					stable = true;
+				stable = true;
+				var bodyCollisions:Boolean = true;
+				while(bodyCollisions) {
+					var bodyCollision:Collision = detectBodyCollision();
+					if(bodyCollision)
+						resolveCollision(bodyCollision);
+					else
+						bodyCollisions = false;
+				}
+				//var cs:ContactSolver = new ContactSolver(contacts); OLD
+				var boundCollisions:Boolean = true;
+				while(boundCollisions) {
+					var boundCollision:Collision = detectBoundCollision();
+					if(boundCollision)
+						resolveCollision(boundCollision);
+					else
+						boundCollisions = false;
+				}
+				stable = !bodyCollisions && !boundCollisions;
 			}
 			moveBodies();
 		}
 		
-		public function moveBodies():void {
+		// gravity
+		public function applyGravity():void {
 			for each(var rb:RigidBody in bodies) {
-				rb.stepMove(1);
+				if(!rb.fixed) {
+					var v:Vector2D = gravityVector.copy();
+					v.scale(rb.mass);
+					rb.applyForceAt(v,new Vector2D(0,0));
+				}
 			}
 		}
 		
-		// detects collisions between Rigid Bodies
-		public function detectCollisions():Vector.<ShapePenetration> {
-			var contacts:Vector.<ShapePenetration> = new Vector.<ShapePenetration>();
+		// detects collisions between Rigid Bodies and returns the first it finds
+		public function detectBodyCollision():Collision {
 			var len:uint = bodies.length;
 			for(var i:uint = 0; i < len-1; i++) {
 				for(var j:uint = i+1; j < len; j++) {
-					var result:Penetration = new Penetration(bodies[i], bodies[j]);
-					if(result.exists()) {
-						var collisions:Vector.<ShapePenetration> = new Vector.<ShapePenetration>();
-						for(var k:uint = 0; k < result.shapePenData.length; k++) {
-							if(result.shapePenData[k].ipv.magSquared() > COLLISION_THRESHOLD)
-								collisions.push(result.shapePenData[k]);
-							else
-								contacts.push(result.shapePenData[k]);
-						}
-						if(collisions.length > 0) {
-							resolveCollision(collisions);
-							bodies[i].calculateNextVertices();
-							bodies[j].calculateNextVertices();
-							// must restart process
-							i = 0;
-							contacts = new Vector.<ShapePenetration>();
+					var collision:Collision = new Collision(bodies[i], bodies[j]);
+					if (collision.exists()) {
+						if (collision.ipv.magSquared() > COLLISION_THRESHOLD) {
+							return collision;
 						}
 					}
 				}
 			}
-			return contacts;
+			return null;
 		}
 		
 		// keeps Rigid Bodies within the boundaries
 		// returns true if a body is moved
-		public function checkBounds():Boolean {
+		public function detectBoundCollision():Collision {
+			return null;
 			var stateChanged:Boolean = false;
 			for each(var rb:RigidBody in bodies) {
 				var len:uint = bounds.length;
@@ -133,51 +139,39 @@ package Collisions
 					}
 				}
 			}
-			return stateChanged;
+			//return stateChanged;
+			return null;
 		}
 		
-		// gravity
-		public function applyGravity():void {
+		// move the bodies
+		public function moveBodies():void {
 			for each(var rb:RigidBody in bodies) {
-				if(!rb.fixed) {
-					var v:Vector2D = gravityVector.copy();
-					v.scale(rb.mass);
-					rb.applyForceAt(v,new Vector2D(0,0));
-				}
+				rb.stepMove(1);
 			}
 		}
 		
 		// moves the parameter Rigid Bodies out of their collision and 
 		// adjusts their (linear and angular) velocities
-		public function resolveCollision(vsp:Vector.<ShapePenetration>):void {
+		public function resolveCollision(colData:Collision):void {
 			// first average the collision impules
 			var rad1:Vector2D = new Vector2D(0,0);
 			var rad2:Vector2D = new Vector2D(0,0);
 			var impulse1:Vector2D = new Vector2D(0,0);
 			var impulse2:Vector2D = new Vector2D(0,0);
-			var colData:Collision;
 			var maxTime:Number = 0;
-			var len:uint = vsp.length;
-			for(var i:uint = 0; i < len; i++) {
-				rad1.add(vsp[i].radius1);
-				rad2.add(vsp[i].radius2);
-				colData = new Collision(vsp[i]);
-				var temp:Vector2D = vsp[i].collisionAxis.copy();
-				temp.scale(-colData.impulseScalar);
-				impulse1.add(temp);
-				temp.invert();
-				impulse2.add(temp);
-				if(vsp[i].penetrationTime > maxTime)
-					maxTime = vsp[i].penetrationTime;
-			}
-			rad1.scale(1/len);
-			rad2.scale(1/len);
-			impulse1.scale(1/len);
-			impulse2.scale(1/len);
+			rad1.add(colData.radius1);
+			rad2.add(colData.radius2);
+			var temp:Vector2D = colData.collisionAxis.copy();
+			temp.scale(-colData.impulseScalar);
+			impulse1.add(temp);
+			temp.invert();
+			impulse2.add(temp);
+			if(colData.penetrationTime > maxTime)
+				maxTime = colData.penetrationTime;
 			
 			// adjust linear and angular velocities from collisoin impulse
-			vsp[0].rb1.applyImpulseAt(impulse1, rad1);
-			vsp[0].rb2.applyImpulseAt(impulse2, rad2);
+			colData.rb1.applyImpulseAt(impulse1, rad1);
+			colData.rb2.applyImpulseAt(impulse2, rad2);
 			
 			// adjust linear and angular velocities from frictional impulse
 //			impulse = colData.frictionalImpulse;
@@ -185,8 +179,8 @@ package Collisions
 //			sp.rb2.applyImpulseAt(impulse.invert(), sp.radius2);
 			
 			// move Rigid Bodies appropriate amount away from collision
-			vsp[0].rb1.stepMove(maxTime);
-			vsp[0].rb2.stepMove(maxTime);
+			colData.rb1.stepMove(maxTime);
+			colData.rb2.stepMove(maxTime);
 			colData.printResults();
 		}
 		
@@ -201,8 +195,7 @@ package Collisions
 				rb.velocity.scale(timeToPenetration);
 				rb.angularVelocity = initialAngularVelocity*timeToPenetration;				
 				rb.calculateNextVertices();
-				var intervals:Vector.<Interval> = rb.project(axis);
-				var projection:Interval = Interval.Inclusion(intervals);
+				var projection:Interval = rb.project(axis);
 				if(projection.leftLimit < limit)
 					over = true;
 				else
@@ -219,22 +212,20 @@ package Collisions
 		
 		private function findRadius(rb:RigidBody, axis:Vector2D, limit:Number):Vector2D {
 			var tangentVectors:Vector.<Vector2D> = new Vector.<Vector2D>();
-			for each(var s:AbstractShape in rb.shapes) {
-				if(s is Polygon) {
-					for each(var v:Vector2D in s.nextVertices) {
-						if(CSQMath.equalWithin(v.dot(axis), limit, 0.1))
-							tangentVectors.push(v.copy());
-					}
-				} else {
-					var tempVec:Vector2D = axis.invert();
-					if(s is Disk)
-						tempVec.scale((s as Disk).radius);
-					else
-						tempVec.scale((s as Ring).outerRadius);
-					tempVec.add(s.nextVertices[0]);
-					if(CSQMath.equalWithin(tempVec.dot(axis), limit, 0.1))
-						tangentVectors.push(tempVec);
+			if(rb.shape is Polygon) {
+				for each(var v:Vector2D in rb.shape.nextVertices) {
+					if(CSQMath.equalWithin(v.dot(axis), limit, 0.1))
+						tangentVectors.push(v.copy());
 				}
+			} else {
+				var tempVec:Vector2D = axis.invert();
+				if(rb.shape is Disk)
+					tempVec.scale((rb.shape as Disk).radius);
+				else
+					tempVec.scale((rb.shape as Ring).outerRadius);
+				tempVec.add(rb.shape.nextVertices[0]);
+				if(CSQMath.equalWithin(tempVec.dot(axis), limit, 0.1))
+					tangentVectors.push(tempVec);
 			}
 			var len:uint = tangentVectors.length;
 			for(var i:uint; i < len; i++) {
@@ -318,12 +309,12 @@ package Collisions
 				index++;
 			}
 			index++;
-			var shapes:Array = new Array();
+			var s:AbstractShape;
 			for(var i:uint = 1; i < file.numObjects; i++) {
 				arr = file.getObjectData(i);
 				switch(arr[0]) {
 					case "RigidBody":
-						var rb:RigidBody = new RigidBody(shapes);
+						var rb:RigidBody = new RigidBody(s);
 						rb.center = arr[1];
 						rb.velocity = arr[2];
 						rb.angularVelocity = arr[3];
@@ -339,15 +330,12 @@ package Collisions
 						rb.x = rb.center.x;
 						rb.y = rb.center.y;
 						addBody(rb);
-						shapes = new Array();
 						break;
 					case "Disk":
-						var s:AbstractShape = new Disk(arr[1], arr[2], arr[3], arr[4]);
-						shapes.push(s);
+						s = new Disk(arr[1], arr[2], arr[3], arr[4]);
 						break;
 					case "Ring":
 						s = new Ring(arr[1], arr[2], arr[3], arr[4], arr[5]);
-						shapes.push(s);
 						break;
 					case "Polygon":
 						index2 = 2;
@@ -357,7 +345,6 @@ package Collisions
 							index2++;
 						}
 						s = new Polygon(arr[1], vertices, arr[index2], arr[index2+1]);
-						shapes.push(s);
 						break;
 				}
 			}

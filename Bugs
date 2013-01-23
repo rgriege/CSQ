@@ -8,3 +8,4 @@ shape penetration radii are slightly off?
 small, high speed objects will pass through other objects
 optimize
 	every frame, set vertices to nextVertices for movement
+don't allow saving when collisions present; do at end of EFH

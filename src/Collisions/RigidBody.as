@@ -18,8 +18,8 @@ package Collisions
 	
 	public class RigidBody extends MovieClip
 	{
-		// stores the shapes
-		public var shapes:Vector.<AbstractShape>;
+		// stores the shape
+		public var shape:AbstractShape
 		// stores the mean x and y values, used for axis checking in the collidesWith method
 		public var center:Vector2D;
 		// stores the maximum distance from the center to a vertex of a shape
@@ -50,16 +50,11 @@ package Collisions
 		// sprite to hold the graphics for anchors and fixed points
 		public var oxSprite:Sprite;
 		
-		public function RigidBody(shapes:Array, restitution:Number=1, friction:Number=1) {
+		public function RigidBody(shape:AbstractShape, restitution:Number=1, friction:Number=1) {
 			maxRadius = 0;
-			this.shapes = new Vector.<AbstractShape>();
-			for each(var s:AbstractShape in shapes) {
-				this.shapes.push(s);
-				addChild(s);
-				var temp:Number = s.findMaxRadius();
-				if(temp > maxRadius)
-					maxRadius = temp;
-			}
+			this.shape = shape;
+			addChild(shape);
+			maxRadius = shape.findMaxRadius();
 			this.restitution = restitution;
 			this.friction = friction;
 			center = new Vector2D(0, 0);
@@ -67,26 +62,11 @@ package Collisions
 			angularVelocity = 0;
 			force = new Vector2D(0,0);
 			torque = 0;
-			calculateMass();
-			calculateMomentOfInertia();
-			drawShapes();
+			mass = shape.mass;
+			momentOfInertia = shape.calculateMomentOfInertia();
+			drawShape();
 			oxSprite = new Sprite();
 			addChild(oxSprite);
-		}
-		
-		private function calculateMass():void {
-			mass = 0;
-			for each(var shape:AbstractShape in shapes) {
-				mass += shape.mass;
-			}
-		}
-		
-		// calculate the moment of inertia of the whole Rigid Body according to the parallel axis theorem
-		private function calculateMomentOfInertia():void {
-			momentOfInertia = 0;
-			for each(var shape:AbstractShape in shapes) {
-				momentOfInertia += shape.calculateMomentOfInertia() + shape.mass * shape.center.magSquared();
-			}
 		}
 		
 		// Sets an anchor around which the Rigid Body may rotate freely but restricts horizontal
@@ -100,17 +80,14 @@ package Collisions
 			}
 		}
 		
+		// 2.5D drawing mode
 		public function setHorizon(v:Vector2D):void {
-			for each(var s:AbstractShape in shapes) {
-				s.setHorizon(v);
-			}
+			shape.setHorizon(v);
 		}
 		
 		// draws the polygon
-		public function drawShapes():void {
-			for each(var shape:AbstractShape in shapes) {
-				shape.drawVertices();
-			}
+		public function drawShape():void {
+			shape.drawVertices();
 		}
 		
 		public function drawOX():void {
@@ -128,12 +105,9 @@ package Collisions
 		}
 		
 		// projects the Rigid Body onto the input axis
-		public function project(axis:Vector2D):Vector.<Interval> {
+		public function project(axis:Vector2D):Interval {
 			var axisCopy:Vector2D = axis.isUnitVector() ? axis.copy() : axis.unitVector();
-			var result:Vector.<Interval> = new Vector.<Interval>();
-			for each(var s:AbstractShape in shapes) {
-				result = result.concat(s.project(axisCopy));
-			}
+			var result:Interval = shape.project(axisCopy);
 			return result;
 		}
 		
@@ -200,14 +174,12 @@ package Collisions
 		
 		// manually moves the rigid body a certain distance without changing velocity
 		public function translate(change:Vector2D):void {
-
 			center.add(change);
 			this.x = center.x;
 			this.y = center.y;
 		}
 		
 		public function translate2(x:Number, y:Number):void {
-
 			center.x += x;
 			center.y += y;
 			this.x = center.x;
@@ -216,9 +188,7 @@ package Collisions
 		
 		// Rotates the rigid body a certain angle CCW about the center of mass
 		public function rotate(radians:Number):void {
-			for each(var s:AbstractShape in shapes) {
-				s.rotateAround(radians);
-			}
+			shape.rotateAround(radians);
 			if(anchor != null) 
 				anchor.rotate(radians);
 			var degrees:Number = radians*180/Math.PI;
@@ -233,20 +203,14 @@ package Collisions
 		}
 		
 		public function calculateNextVertices():void {
-			for each(var s:AbstractShape in shapes) {
-				s.calculateNextVertices(center, velocity, angularVelocity);
-			}
+			shape.calculateNextVertices(center, velocity, angularVelocity);
 		}
 		
 		// exports the important data of this Rigid Body to a string for saving
 		public function exportData():String {
-			// first export each shape
+			// first export the shape
 			var result:String = new String("");
-			var len:uint = shapes.length;
-			for(var j:uint = 0; j < len; j++) {
-				shapes[j].roundValues();
-				result += shapes[j].exportData();
-			}
+			result += shape.exportData();
 			// then export the properties of the rigid body
 			roundValues();
 			result += "RigidBody;";
@@ -279,10 +243,8 @@ package Collisions
 		
 		// print method for debugging
 		public function printVertices():void {
-			trace("Shapes:");
-			for(var i:uint = 0; i < shapes.length; i++) {
-				trace(shapes[i].toString());
-			}
+			trace("Shape:");
+			trace(shape.toString());
 		}
 	}
 }

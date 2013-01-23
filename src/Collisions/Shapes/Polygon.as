@@ -122,9 +122,21 @@ package Collisions.Shapes
 			return mass/6*numerator/denominator;
 		}
 		
+		override public function getSeparatingAxes(s:AbstractShape):Vector.<Vector2D> {
+			var result:Vector.<Vector2D> = new Vector.<Vector2D>();
+			var len:uint = nextVertices.length;
+			for(var i:uint = 0; i < len; i++) {
+				var edge:Vector2D = (i < len - 1) ? nextVertices[i+1].copy() : nextVertices[0].copy();
+				edge.subtract(nextVertices[i]);
+				var axis:Vector2D = edge.getPerpendicular().unitVector();
+				result.push(axis);
+			}
+			return result;
+		}
+		
 		// Instead of projecting the actual vertices, we project copies of them that
 		// have the velocity added in, thus detecting collisions before they happen.
-		override public function project(axis:Vector2D):Vector.<Interval> {
+		override public function project(axis:Vector2D):Interval {
 			var axisCopy:Vector2D = axis.isUnitVector() ? axis.copy() : axis.unitVector();
 			var projection:Interval = new Interval(nextVertices[0].dot(axisCopy), nextVertices[0].dot(axisCopy));
 			var len:uint = vertices.length;
@@ -133,9 +145,7 @@ package Collisions.Shapes
 				projection.leftLimit = (temp < projection.leftLimit) ? temp : projection.leftLimit;
 				projection.rightLimit = (temp > projection.rightLimit) ? temp : projection.rightLimit;
 			}
-			var result:Vector.<Interval> = new Vector.<Interval>();
-			result.push(projection);
-			return result;
+			return projection;
 		}
 		
 		override public function findMaxRadius():Number {
@@ -148,18 +158,6 @@ package Collisions.Shapes
 					result = distance;
 			}
 			return Math.sqrt(result);
-		}
-		
-		public function findEdgePerpendiculars():Vector.<Vector2D> {
-			var result:Vector.<Vector2D> = new Vector.<Vector2D>();
-			var len:uint = nextVertices.length;
-			for(var i:uint = 0; i < len; i++) {
-				var edge:Vector2D = (i < len - 1) ? nextVertices[i+1].copy() : nextVertices[0].copy();
-				edge.subtract(nextVertices[i]);
-				var axis:Vector2D = edge.getPerpendicular().unitVector();
-				result.push(axis);
-			}
-			return result;
 		}
 		
 		override public function drawVertices():void {
